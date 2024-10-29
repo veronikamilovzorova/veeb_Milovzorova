@@ -1,113 +1,63 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using veeb_Milovzorova.Models;
 
 namespace veeb_Milovzorova.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/toode")]
     [ApiController]
-    public class TootedController : ControllerBase
+    public class ToodeController : ControllerBase
     {
         private static List<Toode> _tooted = new()
         {
-            new Toode(1,"Koola", 1.5, true),
-            new Toode(2,"Fanta", 1.0, false),
-            new Toode(3,"Sprite", 1.7, true),
-            new Toode(4,"Vichy", 2.0, true),
-            new Toode(5,"Vitamin well", 2.5, true)
+            new Toode(1, "Koola", 1.5, true),
+            new Toode(2, "Fanta", 1.0, false),
+            new Toode(3, "Sprite", 1.7, true),
+            new Toode(4, "Vichy", 2.0, true),
+            new Toode(5, "Vitamin well", 2.5, true)
         };
 
-        // GET https://localhost:4444/tooted
-        [HttpGet]
-        public List<Toode> Get()
-        {
-            return _tooted;
-        }
-
-        // DELETE https://localhost:4444/tooted/kustuta/0
+        // DELETE /toode/kustuta/{index}
         [HttpDelete("kustuta/{index}")]
-        public List<Toode> Delete(int index)
+        public ActionResult<List<Toode>> Kustuta(int index)
         {
-            _tooted.RemoveAt(index);
-            return _tooted;
+            if (index < 1 || index > _tooted.Count) return NotFound("Toodet ei leitud!");
+            _tooted.RemoveAt(index - 1);
+            return Ok(_tooted);
         }
 
-        [HttpDelete("kustuta2/{index}")]
-        public string Delete2(int index)
+        // PUT /toode/lylitus-tegevus/{index}
+        [HttpPut("lylitus-tegevus/{index}")]
+        public ActionResult<List<Toode>> MuudaAktiivsust(int index)
         {
-            _tooted.RemoveAt(index);
-            return "Kustutatud!";
+            if (index < 1 || index > _tooted.Count) return NotFound("Toodet ei leitud!");
+            _tooted[index - 1].IsActive = !_tooted[index - 1].IsActive;
+            return Ok(_tooted);
         }
 
-        // POST https://localhost:4444/tooted/lisa/1/Coca/1.5/true
-        [HttpPost("lisa")]
-        public List<Toode> Add([FromBody] Toode toode)
+        // PUT /toode/muuta-nimi/{index}/{uusNimi}
+        [HttpPut("muuta-nimi/{index}/{uusNimi}")]
+        public ActionResult<List<Toode>> MuudaNime(int index, string uusNimi)
         {
-            _tooted.Add(toode);
-            return _tooted;
+            if (index < 1 || index > _tooted.Count) return NotFound("Toodet ei leitud!");
+            _tooted[index - 1].Name = uusNimi;
+            return Ok(_tooted);
         }
 
-        [HttpPost("lisa2")]
-        public List<Toode> Add2(int id, string nimi, double hind, bool aktiivne)
+        // PUT /toode/update-price/{index}/{kordaja}
+        [HttpPut("uuendus-hind/{index}/{kordaja}")]
+        public ActionResult<List<Toode>> UuendaHinda(int index, double kordaja)
         {
-            Toode toode = new Toode(id, nimi, hind, aktiivne);
-            _tooted.Add(toode);
-            return _tooted;
+            if (index < 1 || index > _tooted.Count) return NotFound("Toodet ei leitud!");
+            _tooted[index - 1].Price *= kordaja;
+            return Ok(_tooted);
         }
 
-        // PATCH https://localhost:4444/tooted/hind-dollaritesse/1.5
-        [HttpPatch("hind-dollaritesse/{kurss}")]
-        public List<Toode> UpdatePrices(double kurss)
+        // GET /toode/{index}
+        [HttpGet("{index}")]
+        public ActionResult<Toode> SaadaToode(int index)
         {
-            for (int i = 0; i < _tooted.Count; i++)
-            {
-                _tooted[i].Price = _tooted[i].Price * kurss;
-            }
-            return _tooted;
+            if (index < 1 || index > _tooted.Count) return NotFound("Toodet ei leitud!");
+            return Ok(_tooted[index - 1]);
         }
-        [HttpGet("kustuta-koik")]
-        public string DeleteAll()
-        {
-            _tooted.Clear();
-            return "Kõik tooted on kustutatud!";
-        }
-
-        [HttpGet("deaktiveeri-koik")]
-        public List<Toode> DeactivateAll()
-        {
-            foreach (var t in _tooted)
-            {
-                t.IsActive = false;
-            }
-            return _tooted;
-        }
-        [HttpGet("toode/{index}")]
-        public ActionResult<Toode> GetProduct(int index)
-        {
-            if (index < 0 || index >= _tooted.Count)
-            {
-                return NotFound("Toodet ei leitud!");
-            }
-            return _tooted[index];
-        }
-        [HttpGet("kalleim-toode")]
-        public ActionResult<Toode> GetMostExpensiveProduct()
-        {
-            if (_tooted.Count == 0)
-            {
-                return NotFound("Tooteid ei ole saadaval!");
-            }
-
-            Toode? mostExpensive = _tooted.OrderByDescending(t => t.Price).FirstOrDefault();
-
-            if (mostExpensive == null)
-            {
-                return NotFound("Kalleimat toodet ei leitud!");
-            }
-
-            return Ok(mostExpensive);
-        }
-
-
     }
 }

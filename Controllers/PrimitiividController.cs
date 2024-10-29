@@ -7,35 +7,35 @@ namespace veeb_Milovzorova.Controllers
     [ApiController]
     public class PrimitiividController : ControllerBase
     {
-        // GET: primitiivid/hello-world
+        
         [HttpGet("hello-world")]
         public string HelloWorld()
         {
             return "Hello world at " + DateTime.Now;
         }
 
-        // GET: primitiivid/hello-variable/mari
+        
         [HttpGet("hello-variable/{nimi}")]
         public string HelloVariable(string nimi)
         {
             return "Hello " + nimi;
         }
 
-        // GET: primitiivid/add/5/6
+        
         [HttpGet("add/{nr1}/{nr2}")]
         public int AddNumbers(int nr1, int nr2)
         {
             return nr1 + nr2;
         }
 
-        // GET: primitiivid/multiply/5/6
+        
         [HttpGet("multiply/{nr1}/{nr2}")]
         public int Multiply(int nr1, int nr2)
         {
             return nr1 * nr2;
         }
 
-        // GET: primitiivid/do-logs/5
+        
         [HttpGet("do-logs/{arv}")]
         public void DoLogs(int arv)
         {
@@ -43,6 +43,38 @@ namespace veeb_Milovzorova.Controllers
             {
                 Console.WriteLine("See on logi nr " + i);
             }
+        }
+
+        
+        [HttpGet("random-number/{min}/{max}")]
+        public ActionResult<int> GenerateRandomNumber(int min, int max)
+        {
+            if (min >= max)
+            {
+                return BadRequest("Min väärtus peab olema väiksem kui max väärtus.");
+            }
+
+            Random rand = new Random();
+            int randomNumber = rand.Next(min, max + 1); // 
+            return randomNumber;
+        }
+
+        
+        [HttpGet("age/{birthYear}")]
+        public ActionResult<string> CalculateAge(int birthYear)
+        {
+            int currentYear = DateTime.Now.Year;
+            int age = currentYear - birthYear;
+
+            
+            bool hadBirthday = DateTime.Now >= new DateTime(currentYear, 1, 1).AddYears(age);
+
+            if (!hadBirthday)
+            {
+                age--; 
+            }
+
+            return $"Oled {(hadBirthday ? age : age + 1)} aastat vana.";
         }
     }
 }
